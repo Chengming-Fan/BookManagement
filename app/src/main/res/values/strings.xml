@@ -4,6 +4,7 @@
     <!-- Strings used for fragments for navigation -->
     <string name="list_fragment_label">Books</string>
     <string name="add_fragment_label">Add</string>
+    <string name="update_fragment_label">Update</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 

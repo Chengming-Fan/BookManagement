@@ -14,6 +14,9 @@
         <action
                 android:id="@+id/action_fragment_list_to_fragment_add"
                 app:destination="@id/fragment_add" />
+        <action
+                android:id="@+id/action_fragment_list_to_fragment_update"
+                app:destination="@id/fragment_update" />
     </fragment>
     <fragment
             android:id="@+id/fragment_add"
@@ -23,6 +26,16 @@
 
         <action
                 android:id="@+id/action_fragment_add_to_fragment_list"
+                app:destination="@id/fragment_list" />
+    </fragment>
+    <fragment
+            android:id="@+id/fragment_update"
+            android:name="com.fan.bookmanagement.fragments.UpdateFragment"
+            android:label="@string/update_fragment_label"
+            tools:layout="@layout/fragment_update">
+
+        <action
+                android:id="@+id/action_fragment_update_to_fragment_list"
                 app:destination="@id/fragment_list" />
     </fragment>
 </navigation>

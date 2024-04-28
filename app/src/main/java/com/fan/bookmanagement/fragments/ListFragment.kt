@@ -88,7 +88,7 @@ class ListFragment : Fragment(), MenuProvider {
         binding.recyclerView.setOnItemMenuClickListener { menuBridge, adapterPosition ->
             menuBridge.closeMenu()
             when (menuBridge.position) {
-                0 -> Log.d("FAN", "delete")
+                0 -> findNavController().navigate(R.id.action_fragment_list_to_fragment_update)
                 1 -> Log.d("FAN", "update")
                 else -> {}
             }
