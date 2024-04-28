@@ -50,4 +50,5 @@
     <string name="isbn_hint">ISBN</string>
     <string name="button_add_text">Add</string>
     <string name="floating_add_button_description">add a new book</string>
+    <string name="app_bar_search_title">Search</string>
 </resources>
