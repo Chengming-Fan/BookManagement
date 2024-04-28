@@ -1,6 +1,7 @@
 package com.fan.bookmanagement.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -12,10 +13,12 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.fan.bookmanagement.R
 import com.fan.bookmanagement.adapters.BookListAdapter
 import com.fan.bookmanagement.databinding.FragmentListBinding
+import com.yanzhenjie.recyclerview.SwipeMenuCreator
+import com.yanzhenjie.recyclerview.SwipeMenuItem
+import com.yanzhenjie.recyclerview.SwipeRecyclerView
 
 class ListFragment : Fragment(), MenuProvider {
 
@@ -31,6 +34,7 @@ class ListFragment : Fragment(), MenuProvider {
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         _binding = FragmentListBinding.inflate(inflater, container, false)
+        addSwipeMenu()
         return binding.root
 
     }
@@ -44,7 +48,7 @@ class ListFragment : Fragment(), MenuProvider {
         val dataset = arrayOf("Java", "Python", "Rust", "C++", "C#", "C", "kotlin", "scala", "JavaScript", "html", "Golang", "PHP")
         val bookListAdapter = BookListAdapter(dataset)
 
-        val recyclerView: RecyclerView = binding.recyclerView
+        val recyclerView: SwipeRecyclerView = binding.recyclerView
         recyclerView.adapter = bookListAdapter
     }
 
@@ -63,6 +67,31 @@ class ListFragment : Fragment(), MenuProvider {
                 true
             }
             else -> false
+        }
+    }
+
+    private fun addSwipeMenu() {
+        val mSwipeMenuCreator =
+            SwipeMenuCreator { leftMenu, rightMenu, position ->
+                val updateItemRight = SwipeMenuItem(context)
+                updateItemRight.setImage(R.drawable.baseline_create_24)
+                updateItemRight.setWidth(120)
+                updateItemRight.setHeight(120)
+                val deleteItemRight = SwipeMenuItem(context)
+                deleteItemRight.setImage(R.drawable.baseline_clear_24)
+                deleteItemRight.setWidth(120)
+                deleteItemRight.setHeight(120)
+                rightMenu?.addMenuItem(updateItemRight)
+                rightMenu?.addMenuItem(deleteItemRight)
+            }
+        binding.recyclerView.setSwipeMenuCreator(mSwipeMenuCreator)
+        binding.recyclerView.setOnItemMenuClickListener { menuBridge, adapterPosition ->
+            menuBridge.closeMenu()
+            when (menuBridge.position) {
+                0 -> Log.d("FAN", "delete")
+                1 -> Log.d("FAN", "update")
+                else -> {}
+            }
         }
     }
 }
