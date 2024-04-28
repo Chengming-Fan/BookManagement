@@ -31,7 +31,7 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.floatingAddButton.setOnClickListener {
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+            findNavController().navigate(R.id.action_fragment_list_to_fragment_add)
         }
         val dataset = arrayOf("Java", "Python", "Rust", "C++", "C#", "C", "kotlin", "scala", "JavaScript", "html", "Golang", "PHP")
         val bookListAdapter = BookListAdapter(dataset)
