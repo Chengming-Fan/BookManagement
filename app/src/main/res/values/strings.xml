@@ -2,8 +2,8 @@
     <string name="app_name">BookManagement</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="list_fragment_label">Books</string>
+    <string name="add_fragment_label">Add</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
@@ -43,4 +43,11 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="fragment_add_title">Add book</string>
+    <string name="book_title_hint">Book Title</string>
+    <string name="book_author_hint">Author</string>
+    <string name="publication_year_hint">Publication Year</string>
+    <string name="isbn_hint">ISBN</string>
+    <string name="button_add_text">Add</string>
+    <string name="floating_add_button_description">add a new book</string>
 </resources>

@@ -22,7 +22,6 @@
                         android:id="@+id/textview_book_id"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/guideline"
                         app:layout_constraintStart_toStartOf="parent"
@@ -34,22 +33,22 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:text="TextView"
                         android:textSize="24sp"
                         app:layout_constraintBottom_toTopOf="@+id/textview_book_author"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="@+id/guideline"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="title" />
 
                 <TextView
                         android:id="@+id/textview_book_author"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/textview_book_title"
-                        app:layout_constraintTop_toBottomOf="@+id/textview_book_title" />
+                        app:layout_constraintTop_toBottomOf="@+id/textview_book_title"
+                        tools:text="author" />
 
                 <androidx.constraintlayout.widget.Guideline
                         android:id="@+id/guideline"
