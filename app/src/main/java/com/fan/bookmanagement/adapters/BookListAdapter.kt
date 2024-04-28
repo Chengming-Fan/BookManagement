@@ -1,14 +1,39 @@
 package com.fan.bookmanagement.adapters
 
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fan.bookmanagement.R
+import com.fan.bookmanagement.data.Book
 
-class BookListAdapter(private val dataSet: Array<String>) :
-    RecyclerView.Adapter<BookListAdapter.ViewHolder>() {
+val diffCallback = object : DiffUtil.ItemCallback<Book>() {
+    override fun areItemsTheSame(oldItem: Book, newItem: Book) = oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: Book, newItem: Book): Boolean {
+        return (oldItem.title == newItem.title)
+                && (oldItem.author == newItem.author)
+                && (oldItem.year == newItem.year)
+                && (oldItem.isbn == newItem.isbn)
+    }
+}
+class BookListAdapter: ListAdapter<Book, BookListAdapter.ViewHolder>(diffCallback) {
+    private var dataSet: List<Book> = emptyList()
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    fun setData(dataList: List<Book>) {
+        this.dataSet = dataList
+        mainHandler.post { notifyDataSetChanged() }
+    }
+
+    fun getData(): List<Book> {
+        return dataSet
+    }
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textViewBookTitle: TextView
         val textViewAuthor: TextView
@@ -29,8 +54,10 @@ class BookListAdapter(private val dataSet: Array<String>) :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.textViewBookTitle.text = dataSet[position]
-        viewHolder.textViewId.text = position.toString()
+        val curBook = dataSet[position]
+        viewHolder.textViewId.text = curBook.id.toString()
+        viewHolder.textViewBookTitle.text = curBook.title
+        viewHolder.textViewAuthor.text = curBook.author
     }
 
     override fun getItemCount(): Int {
