@@ -17,9 +17,9 @@
     </fragment>
     <fragment
             android:id="@+id/SecondFragment"
-            android:name="com.fan.bookmanagement.fragments.SecondFragment"
+            android:name="com.fan.bookmanagement.fragments.AddFragment"
             android:label="@string/second_fragment_label"
-            tools:layout="@layout/fragment_second">
+            tools:layout="@layout/fragment_add">
 
         <action
                 android:id="@+id/action_SecondFragment_to_FirstFragment"
