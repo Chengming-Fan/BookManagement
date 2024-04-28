@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_update"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".fragments.UpdateFragment">
+
+        <TextView
+                android:id="@+id/textview_fragment_update_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fragment_update_title"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.1" />
+
+        <EditText
+                android:id="@+id/edittext_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:ems="10"
+                android:hint="@string/book_title_hint"
+                android:inputType="textPersonName"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.2" />
+
+        <EditText
+                android:id="@+id/edittext_author"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/book_author_hint"
+                android:inputType="textPersonName"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.3"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp" />
+
+        <EditText
+                android:id="@+id/edittext_year"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/publication_year_hint"
+                android:focusable="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.4"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp" />
+
+        <EditText
+                android:id="@+id/edittext_isbn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/isbn_hint"
+                android:inputType="textPersonName"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:layout_constraintHorizontal_bias="1.0"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp" />
+
+        <Button
+                android:id="@+id/button_update"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/button_update_text"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.6"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

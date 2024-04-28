@@ -51,4 +51,6 @@
     <string name="button_add_text">Add</string>
     <string name="floating_add_button_description">add a new book</string>
     <string name="app_bar_search_title">Search</string>
+    <string name="fragment_update_title">Update book</string>
+    <string name="button_update_text">Update</string>
 </resources>
