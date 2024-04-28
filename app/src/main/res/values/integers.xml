@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="currentYear">2024</integer>
+    <integer name="minYear">1900</integer>
+</resources>
