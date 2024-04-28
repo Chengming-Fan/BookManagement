@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.fan.bookmanagement.R
+import com.fan.bookmanagement.adapters.BookListAdapter
 import com.fan.bookmanagement.databinding.FragmentListBinding
 
 class ListFragment : Fragment() {
@@ -31,6 +33,11 @@ class ListFragment : Fragment() {
         binding.floatingAddButton.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
+        val dataset = arrayOf("Java", "Python", "Rust", "C++", "C#", "C", "kotlin", "scala", "JavaScript", "html", "Golang", "PHP")
+        val bookListAdapter = BookListAdapter(dataset)
+
+        val recyclerView: RecyclerView = binding.recyclerView
+        recyclerView.adapter = bookListAdapter
     }
 
     override fun onDestroyView() {
