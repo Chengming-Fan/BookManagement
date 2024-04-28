@@ -1,5 +1,6 @@
 package com.fan.bookmanagement.fragments
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -89,9 +90,20 @@ class ListFragment : Fragment(), MenuProvider {
             menuBridge.closeMenu()
             when (menuBridge.position) {
                 0 -> findNavController().navigate(R.id.action_fragment_list_to_fragment_update)
-                1 -> Log.d("FAN", "update")
+                1 -> showDeleteConfirmDialog()
                 else -> {}
             }
         }
+    }
+
+    private fun showDeleteConfirmDialog() {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Delete")
+            .setMessage("Are you sure to delete this book?")
+            .setPositiveButton("Yes") { dialog, which ->
+            }
+            .setNegativeButton("No") { dialog, which ->
+            }
+            .show()
     }
 }
