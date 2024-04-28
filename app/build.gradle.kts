@@ -41,6 +41,9 @@ android {
 
 dependencies {
 
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    implementation("org.mockito:mockito-android:5.11.0")
+    debugImplementation("androidx.fragment:fragment-testing:1.6.2")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
