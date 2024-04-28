@@ -3,7 +3,6 @@ package com.fan.bookmanagement.fragments
 import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -11,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -102,7 +102,10 @@ class ListFragment : Fragment(), MenuProvider {
         binding.recyclerView.setOnItemMenuClickListener { menuBridge, adapterPosition ->
             menuBridge.closeMenu()
             when (menuBridge.position) {
-                0 -> findNavController().navigate(R.id.action_fragment_list_to_fragment_update)
+                0 -> {
+                    val bundle = bundleOf("book" to bookListAdapter.getData()[adapterPosition])
+                    findNavController().navigate(R.id.action_fragment_list_to_fragment_update, bundle)
+                }
                 1 -> showDeleteConfirmDialog(bookListAdapter.getData()[adapterPosition])
                 else -> {}
             }
@@ -114,9 +117,7 @@ class ListFragment : Fragment(), MenuProvider {
         builder.setTitle("Delete")
             .setMessage("Are you sure to delete this book?")
             .setPositiveButton("Yes") { dialog, which ->
-                DeleteBook(book.id)
-            }
-            .setNegativeButton("No") { dialog, which ->
+                deleteBook(book.id)
             }
             .show()
     }
@@ -153,7 +154,7 @@ class ListFragment : Fragment(), MenuProvider {
         })
     }
 
-    private fun DeleteBook(id: Int) {
+    private fun deleteBook(id: Int) {
         val client = OkHttpClient()
 
         val request = Request.Builder()
