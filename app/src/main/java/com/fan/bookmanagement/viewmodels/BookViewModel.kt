@@ -21,7 +21,7 @@ import okio.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-private const val API_URL = "http://192.168.0.100:8080/books"
+private const val API_URL = "http://18.167.54.212:8080/books"
 private const val BAD_REQUEST = 400
 private val gson = Gson()
 
@@ -89,16 +89,15 @@ class BookViewModel : ViewModel() {
                 callUpdateBookApi(id, book)
             }
             withContext(Dispatchers.Main) {
-                val newList = mutableListOf<Book>()
                 val currentList = _bookList.value.orEmpty().toMutableList()
-                currentList.forEach { it ->
-                    if (it.id != id) {
-                        newList.add(it)
-                    } else {
-                        newList.add(Book(id, book.title, book.author, book.year, book.isbn))
+                currentList.forEach {
+                    if (it.id == id) {
+                        it.title = book.title
+                        it.author = book.author
+                        it.year = book.year
+                        it.isbn = book.isbn
                     }
                 }
-                updateBookList(newList)
             }
         }
     }
