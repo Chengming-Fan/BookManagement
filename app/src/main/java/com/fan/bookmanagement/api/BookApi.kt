@@ -12,6 +12,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -36,10 +37,14 @@ object BookApi {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val responseData = response.body?.string()
-                    val bookList: List<Book> =
-                        gson.fromJson(responseData, object : TypeToken<List<Book>>() {}.type)
-                    continuation.resume(bookList)
+                    if (!response.isSuccessful) {
+                        handleBusinessException(response, continuation)
+                    } else {
+                        val responseData = response.body?.string()
+                        val bookList: List<Book> =
+                            gson.fromJson(responseData, object : TypeToken<List<Book>>() {}.type)
+                        continuation.resume(bookList)
+                    }
                 }
             })
         }
@@ -64,11 +69,10 @@ object BookApi {
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use {
-                        val responseData = response.body?.string()
                         if (!response.isSuccessful) {
-                            val errorResponse = gson.fromJson(responseData, ErrorResponse::class.java)
-                            continuation.resumeWithException(IOException(errorResponse.message))
+                            handleBusinessException(response, continuation)
                         } else {
+                            val responseData = response.body?.string()
                             continuation.resume(
                                 gson.fromJson(
                                     responseData,
@@ -98,8 +102,8 @@ object BookApi {
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use {
-                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                        continuation.resume(true)
+                        if (!response.isSuccessful) handleBusinessException(response, continuation)
+                        else continuation.resume(true)
                     }
                 }
             })
@@ -125,11 +129,20 @@ object BookApi {
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use {
-                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                        continuation.resume(true)
+                        if (!response.isSuccessful) handleBusinessException(response, continuation)
+                        else continuation.resume(true)
                     }
                 }
             })
         }
+    }
+
+    private fun<T> handleBusinessException(
+        response: Response,
+        continuation: Continuation<T>
+    ) {
+        val responseData = response.body?.string()
+        val errorResponse = gson.fromJson(responseData, ErrorResponse::class.java)
+        continuation.resumeWithException(IOException(errorResponse.message))
     }
 }
