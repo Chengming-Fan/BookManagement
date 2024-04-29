@@ -26,7 +26,7 @@ class BookViewModel : ViewModel() {
     }
 
     fun clearErrorMessage() {
-        _errorMessage.postValue(null)
+        _errorMessage.postValue("")
     }
 
     fun fetchBooks() {
