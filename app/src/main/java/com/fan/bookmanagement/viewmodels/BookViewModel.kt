@@ -21,8 +21,12 @@ class BookViewModel : ViewModel() {
         _bookList.value = emptyList()
     }
 
-    fun updateBookList(newList: List<Book>) {
+    private fun updateBookList(newList: List<Book>) {
         _bookList.value = newList
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.postValue(null)
     }
 
     fun fetchBooks() {

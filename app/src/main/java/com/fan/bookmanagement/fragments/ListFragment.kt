@@ -32,7 +32,6 @@ class ListFragment : Fragment(), MenuProvider {
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
     private lateinit var bookListAdapter: BookListAdapter
-    val gson = Gson()
     private lateinit var bookViewModel: BookViewModel
 
     override fun onCreateView(
@@ -57,8 +56,6 @@ class ListFragment : Fragment(), MenuProvider {
         binding.floatingAddButton.setOnClickListener {
             findNavController().navigate(R.id.action_fragment_list_to_fragment_add)
         }
-//        fetchBooks()
-//        bookListAdapter = BookListAdapter()
         bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
         bookViewModel.bookList.observe(viewLifecycleOwner) { bookList ->
             Log.d("FAN", bookList.size.toString())
@@ -67,7 +64,10 @@ class ListFragment : Fragment(), MenuProvider {
         }
         bookViewModel.errorMessage.observe(viewLifecycleOwner) {
             Log.d("FAN", "error message: $it")
-            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+            if (it?.isNotEmpty() == true) {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                bookViewModel.clearErrorMessage()
+            }
         }
         bookViewModel.fetchBooks()
     }
