@@ -14,7 +14,7 @@ Tested on:
 <img src="images/add.png" alt="add" width="300" /> <img src="images/update.png" alt="update" width="300" />
 
 ## Download
-You can download the app from [release page](https://github.com/Chengming-Fan/BookManagementAPI/releases)
+You can download the app from [release page](https://github.com/Chengming-Fan/BookManagement/releases)
 
 ## Dependencies
 [SwipeRecyclerView](https://github.com/yanzhenjie/SwipeRecyclerView)
