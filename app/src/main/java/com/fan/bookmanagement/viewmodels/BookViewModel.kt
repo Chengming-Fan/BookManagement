@@ -39,10 +39,10 @@ class BookViewModel : ViewModel() {
         _bookList.value = newList
     }
 
-    fun fetchData() {
+    fun fetchBooks() {
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
-                fetchBooks()
+                callGetBooksApi()
             }
             withContext(Dispatchers.Main) {
                 updateBookList(result)
@@ -63,7 +63,27 @@ class BookViewModel : ViewModel() {
         }
     }
 
-    private suspend fun fetchBooks(): List<Book> {
+    fun deleteBook(id: Int) {
+        viewModelScope.launch {
+            val deleted = withContext(Dispatchers.IO) {
+                callDeleteBookApi(id)
+            }
+            withContext(Dispatchers.Main) {
+                if (deleted) {
+                    var newList = mutableListOf<Book>()
+                    val currentList = _bookList.value.orEmpty().toMutableList()
+                    currentList.forEach { it ->
+                        if (it.id != id) {
+                            newList.add(it)
+                        }
+                    }
+                    updateBookList(newList)
+                }
+            }
+        }
+    }
+
+    private suspend fun callGetBooksApi(): List<Book> {
         val client = OkHttpClient()
 
         val request = Request.Builder()
@@ -101,7 +121,7 @@ class BookViewModel : ViewModel() {
         return suspendCoroutine { continuation ->
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    _errorMessage.postValue("Add Failed")
+                    _errorMessage.postValue("Add Failed: ${e.message}")
                 }
 
                 override fun onResponse(call: Call, response: Response) {
@@ -111,6 +131,30 @@ class BookViewModel : ViewModel() {
                         }
                         val responseData = response.body?.string()
                         continuation.resume(gson.fromJson(responseData, object : TypeToken<Book>() {}.type))
+                    }
+                }
+            })
+        }
+    }
+
+    private suspend fun callDeleteBookApi(id: Int): Boolean {
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .delete()
+            .url("http://192.168.0.100:8080/books/${id}")
+            .build()
+
+        return suspendCoroutine { continuation ->
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    _errorMessage.postValue("Delete Failed: ${e.message}")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                        continuation.resume(true)
                     }
                 }
             })

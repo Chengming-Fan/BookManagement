@@ -2,7 +2,6 @@ package com.fan.bookmanagement.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -27,12 +26,6 @@ import com.google.gson.Gson
 import com.yanzhenjie.recyclerview.SwipeMenuCreator
 import com.yanzhenjie.recyclerview.SwipeMenuItem
 import com.yanzhenjie.recyclerview.SwipeRecyclerView
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okio.IOException
 
 class ListFragment : Fragment(), MenuProvider {
 
@@ -80,7 +73,7 @@ class ListFragment : Fragment(), MenuProvider {
         bookViewModel.errorMessage.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
         }
-        bookViewModel.fetchData()
+        bookViewModel.fetchBooks()
     }
 
     override fun onDestroyView() {
@@ -132,35 +125,13 @@ class ListFragment : Fragment(), MenuProvider {
     private fun showDeleteConfirmDialog(book: Book) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Delete")
-            .setMessage("Are you sure to delete this book?")
-            .setPositiveButton("Yes") { dialog, which ->
-                deleteBook(book.id)
+            .setMessage("Are you sure to delete this book (id: ${book.id})?")
+            .setPositiveButton("Yes") { _, _ ->
+                bookViewModel.deleteBook(book.id)
+            }
+            .setNegativeButton("No") { _, _ ->
             }
             .show()
-    }
-
-    private fun deleteBook(id: Int) {
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .delete()
-            .url("http://192.168.0.100:8080/books/${id}")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Looper.prepare()
-                Toast.makeText(context, "Failed to call API, please try later", Toast.LENGTH_LONG).show()
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                }
-            }
-        })
     }
 
 }
