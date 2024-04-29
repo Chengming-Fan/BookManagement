@@ -12,12 +12,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
+private const val API_URL = "http://192.168.0.100:8080/books"
+private const val BAD_REQUEST = 400
+private val gson = Gson()
 
 class BookViewModel : ViewModel() {
     private val _bookList = MutableLiveData<List<Book>>()
@@ -26,17 +32,11 @@ class BookViewModel : ViewModel() {
     val errorMessage: LiveData<String> = _errorMessage
 
     init {
-        _bookList.value = emptyList() // 初始化空的书籍列表
+        _bookList.value = emptyList()
     }
 
     fun updateBookList(newList: List<Book>) {
         _bookList.value = newList
-    }
-
-    fun addBook(book: Book) {
-        val currentList = _bookList.value.orEmpty().toMutableList()
-        currentList.add(book)
-        _bookList.postValue(currentList)
     }
 
     fun fetchData() {
@@ -50,12 +50,25 @@ class BookViewModel : ViewModel() {
         }
     }
 
+    fun addBook(book: Book) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                callAddBookApi(book)
+            }
+            withContext(Dispatchers.Main) {
+                val currentList = _bookList.value.orEmpty().toMutableList()
+                currentList.add(result)
+                _bookList.postValue(currentList)
+            }
+        }
+    }
+
     private suspend fun fetchBooks(): List<Book> {
         val client = OkHttpClient()
 
         val request = Request.Builder()
             .get()
-            .url("http://192.168.0.100:8080/books")
+            .url(API_URL)
             .build()
 
         return suspendCoroutine { continuation ->
@@ -66,60 +79,41 @@ class BookViewModel : ViewModel() {
 
                 override fun onResponse(call: Call, response: Response) {
                     val responseData = response.body?.string()
-                    var gson = Gson()
                     val bookList: List<Book> =
                         gson.fromJson(responseData, object : TypeToken<List<Book>>() {}.type)
                     continuation.resume(bookList)
                 }
             })
         }
-//        client.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: Call, e: IOException) {
-//                Looper.prepare()
-//                Toast.makeText(context, "Failed to call API, please try later", Toast.LENGTH_LONG).show()
-//                e.printStackTrace()
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                response.use {
-//                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-//
-//                    val responseData = response.body?.string()
-//
-//                    try {
-//                        val bookList: List<Book> = gson.fromJson(responseData, object : TypeToken<List<Book>>() {}.type)
-//                        bookListAdapter.setData(bookList)
-//                    } catch (e: JSONException) {
-//                        e.printStackTrace()
-//                    }
-//                }
-//            }
-//        })
     }
 
-//    private fun callAddBook(book: Book) {
-//        val client = OkHttpClient()
-//
-//        val requestBody =
-//            Gson().toJson(book).toRequestBody("application/json".toMediaTypeOrNull())
-//        val request = Request.Builder()
-//            .addHeader("Content-Type", "application/json")
-//            .url("http://192.168.0.100:8080/books")
-//            .post(requestBody)
-//            .build()
-//
-//        client.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: Call, e: IOException) {
-//                Looper.prepare()
-//                Toast.makeText(context, "Failed to call API, please try later", Toast.LENGTH_LONG).show()
-//                e.printStackTrace()
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                response.use {
-//                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-//                }
-//            }
-//        })
-//    }
+    private suspend fun callAddBookApi(book: Book): Book {
+        val client = OkHttpClient()
+
+        val requestBody =
+            gson.toJson(book).toRequestBody("application/json".toMediaTypeOrNull())
+        val request = Request.Builder()
+            .addHeader("Content-Type", "application/json")
+            .url(API_URL)
+            .post(requestBody)
+            .build()
+
+        return suspendCoroutine { continuation ->
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    _errorMessage.postValue("Add Failed")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        if (response.code == BAD_REQUEST) {
+                            _errorMessage.postValue("isbn repeat")
+                        }
+                        val responseData = response.body?.string()
+                        continuation.resume(gson.fromJson(responseData, object : TypeToken<Book>() {}.type))
+                    }
+                }
+            })
+        }
+    }
 }
