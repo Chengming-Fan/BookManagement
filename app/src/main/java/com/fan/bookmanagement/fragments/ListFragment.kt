@@ -62,13 +62,8 @@ class ListFragment : Fragment(), MenuProvider {
         bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
         bookViewModel.bookList.observe(viewLifecycleOwner) { bookList ->
             Log.d("FAN", bookList.size.toString())
-            val size = bookListAdapter.itemCount
-            if (size != bookList.size) {
-                if (size < bookList.size) {
-                    binding.recyclerView.smoothScrollBy(0, -200)
-                }
-                bookListAdapter.setData(bookList)
-            }
+            Log.d("FAN", bookList.toString())
+            bookListAdapter.setData(bookList)
         }
         bookViewModel.errorMessage.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()

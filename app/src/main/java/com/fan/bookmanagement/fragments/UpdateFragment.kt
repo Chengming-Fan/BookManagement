@@ -2,29 +2,20 @@ package com.fan.bookmanagement.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import by.dzmitry_lakisau.month_year_picker_dialog.MonthYearPickerDialog
 import com.fan.bookmanagement.R
 import com.fan.bookmanagement.data.Book
 import com.fan.bookmanagement.databinding.FragmentUpdateBinding
-import com.google.gson.Gson
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okio.IOException
+import com.fan.bookmanagement.viewmodels.BookViewModel
 
 private const val ARG_BOOK = "book"
 class UpdateFragment : Fragment() {
@@ -33,6 +24,7 @@ class UpdateFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var book: Book? = null
+    private lateinit var bookViewModel: BookViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +45,7 @@ class UpdateFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
         this.context?.let {
             val dialog = MonthYearPickerDialog.Builder(
                 it,
@@ -85,7 +78,7 @@ class UpdateFragment : Fragment() {
             val isbn = binding.edittextIsbn.text.trim().toString()
 
             val updatedBook = Book(title, author, year.toInt(), isbn)
-            book?.let { it1 -> updateBook(it1.id, updatedBook) }
+            book?.let { it1 -> bookViewModel.updateBook(it1.id, updatedBook) }
 
             val navController = Navigation.findNavController(it)
             navController.navigateUp()
@@ -113,29 +106,4 @@ class UpdateFragment : Fragment() {
         }
     }
 
-    private fun updateBook(id: Int, book: Book) {
-        val client = OkHttpClient()
-
-        val requestBody =
-            Gson().toJson(book).toRequestBody("application/json".toMediaTypeOrNull())
-        val request = Request.Builder()
-            .addHeader("Content-Type", "application/json")
-            .url("http://192.168.0.100:8080/books/${id}")
-            .patch(requestBody)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Looper.prepare()
-                Toast.makeText(context, "Failed to call API, please try later", Toast.LENGTH_LONG).show()
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                }
-            }
-        })
-    }
 }
