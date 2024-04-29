@@ -3,6 +3,7 @@ package com.fan.bookmanagement.fragments
 import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -15,13 +16,14 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.fan.bookmanagement.R
 import com.fan.bookmanagement.adapters.BookListAdapter
 import com.fan.bookmanagement.data.Book
 import com.fan.bookmanagement.databinding.FragmentListBinding
+import com.fan.bookmanagement.viewmodels.BookViewModel
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.yanzhenjie.recyclerview.SwipeMenuCreator
 import com.yanzhenjie.recyclerview.SwipeMenuItem
 import com.yanzhenjie.recyclerview.SwipeRecyclerView
@@ -31,7 +33,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
-import org.json.JSONException
 
 class ListFragment : Fragment(), MenuProvider {
 
@@ -39,6 +40,7 @@ class ListFragment : Fragment(), MenuProvider {
     private val binding get() = _binding!!
     private lateinit var bookListAdapter: BookListAdapter
     val gson = Gson()
+    private lateinit var bookViewModel: BookViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,15 +57,30 @@ class ListFragment : Fragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        bookListAdapter = BookListAdapter()
+        val recyclerView: SwipeRecyclerView = binding.recyclerView
+        recyclerView.adapter = bookListAdapter
 
         binding.floatingAddButton.setOnClickListener {
             findNavController().navigate(R.id.action_fragment_list_to_fragment_add)
         }
-        fetchBooks()
-        bookListAdapter = BookListAdapter()
-
-        val recyclerView: SwipeRecyclerView = binding.recyclerView
-        recyclerView.adapter = bookListAdapter
+//        fetchBooks()
+//        bookListAdapter = BookListAdapter()
+        bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
+        bookViewModel.bookList.observe(viewLifecycleOwner) { bookList ->
+            Log.d("FAN", bookList.size.toString())
+            val size = bookListAdapter.itemCount
+            if (size != bookList.size) {
+                if (size < bookList.size) {
+                    binding.recyclerView.smoothScrollBy(0, -200)
+                }
+                bookListAdapter.setData(bookList)
+            }
+        }
+        bookViewModel.errorMessage.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+        }
+        bookViewModel.fetchData()
     }
 
     override fun onDestroyView() {
@@ -122,38 +139,6 @@ class ListFragment : Fragment(), MenuProvider {
             .show()
     }
 
-    private fun fetchBooks() {
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .get()
-            .url("http://192.168.0.100:8080/books")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Looper.prepare()
-                Toast.makeText(context, "Failed to call API, please try later", Toast.LENGTH_LONG).show()
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                    val responseData = response.body?.string()
-
-                    try {
-                        val bookList: List<Book> = gson.fromJson(responseData, object : TypeToken<List<Book>>() {}.type)
-                        bookListAdapter.setData(bookList)
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        })
-    }
-
     private fun deleteBook(id: Int) {
         val client = OkHttpClient()
 
@@ -173,7 +158,6 @@ class ListFragment : Fragment(), MenuProvider {
                 response.use {
                     if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                    fetchBooks()
                 }
             }
         })
