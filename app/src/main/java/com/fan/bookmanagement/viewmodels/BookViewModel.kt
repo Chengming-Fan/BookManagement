@@ -4,26 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fan.bookmanagement.api.BookApi
 import com.fan.bookmanagement.data.Book
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okio.IOException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
-private const val API_URL = "http://18.167.54.212:8080/books"
-private const val BAD_REQUEST = 400
-private val gson = Gson()
 
 class BookViewModel : ViewModel() {
     private val _bookList = MutableLiveData<List<Book>>()
@@ -41,174 +27,81 @@ class BookViewModel : ViewModel() {
 
     fun fetchBooks() {
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                callGetBooksApi()
-            }
-            withContext(Dispatchers.Main) {
-                updateBookList(result)
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    BookApi.getAllBooks()
+                }
+                withContext(Dispatchers.Main) {
+                    updateBookList(result)
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to get book list: ${e.message}")
             }
         }
     }
 
     fun addBook(book: Book) {
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                callAddBookApi(book)
-            }
-            withContext(Dispatchers.Main) {
-                val currentList = _bookList.value.orEmpty().toMutableList()
-                currentList.add(result)
-                _bookList.postValue(currentList)
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    BookApi.addBook(book)
+                }
+                withContext(Dispatchers.Main) {
+                    val currentList = _bookList.value.orEmpty().toMutableList()
+                    currentList.add(result)
+                    _bookList.postValue(currentList)
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to add book: ${e.message}"
             }
         }
     }
 
     fun deleteBook(id: Int) {
-        viewModelScope.launch {
-            val deleted = withContext(Dispatchers.IO) {
-                callDeleteBookApi(id)
-            }
-            withContext(Dispatchers.Main) {
-                if (deleted) {
-                    var newList = mutableListOf<Book>()
-                    val currentList = _bookList.value.orEmpty().toMutableList()
-                    currentList.forEach { it ->
-                        if (it.id != id) {
-                            newList.add(it)
+        try {
+            viewModelScope.launch {
+                val deleted = withContext(Dispatchers.IO) {
+                    BookApi.deleteBook(id)
+                }
+                withContext(Dispatchers.Main) {
+                    if (deleted) {
+                        val newList = mutableListOf<Book>()
+                        val currentList = _bookList.value.orEmpty().toMutableList()
+                        currentList.forEach {
+                            if (it.id != id) {
+                                newList.add(it)
+                            }
                         }
+                        updateBookList(newList)
                     }
-                    updateBookList(newList)
                 }
             }
+        } catch (e: Exception) {
+            _errorMessage.postValue("Failed to delete book: ${e.message}")
         }
     }
 
     fun updateBook(id: Int, book: Book) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                callUpdateBookApi(id, book)
-            }
-            withContext(Dispatchers.Main) {
-                val currentList = _bookList.value.orEmpty().toMutableList()
-                currentList.forEach {
-                    if (it.id == id) {
-                        it.title = book.title
-                        it.author = book.author
-                        it.year = book.year
-                        it.isbn = book.isbn
-                    }
+        try {
+            viewModelScope.launch {
+                withContext(Dispatchers.IO) {
+                    BookApi.updateBook(id, book)
                 }
-            }
-        }
-    }
-
-    private suspend fun callGetBooksApi(): List<Book> {
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .get()
-            .url(API_URL)
-            .build()
-
-        return suspendCoroutine { continuation ->
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    _errorMessage.postValue("Network Request Failed")
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    val responseData = response.body?.string()
-                    val bookList: List<Book> =
-                        gson.fromJson(responseData, object : TypeToken<List<Book>>() {}.type)
-                    continuation.resume(bookList)
-                }
-            })
-        }
-    }
-
-    private suspend fun callAddBookApi(book: Book): Book {
-        val client = OkHttpClient()
-
-        val requestBody =
-            gson.toJson(book).toRequestBody("application/json".toMediaTypeOrNull())
-        val request = Request.Builder()
-            .addHeader("Content-Type", "application/json")
-            .url(API_URL)
-            .post(requestBody)
-            .build()
-
-        return suspendCoroutine { continuation ->
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    _errorMessage.postValue("Add Failed: ${e.message}")
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    response.use {
-                        if (response.code == BAD_REQUEST) {
-                            _errorMessage.postValue("isbn repeat")
+                withContext(Dispatchers.Main) {
+                    val currentList = _bookList.value.orEmpty().toMutableList()
+                    currentList.forEach {
+                        if (it.id == id) {
+                            it.title = book.title
+                            it.author = book.author
+                            it.year = book.year
+                            it.isbn = book.isbn
                         }
-                        val responseData = response.body?.string()
-                        continuation.resume(
-                            gson.fromJson(
-                                responseData,
-                                object : TypeToken<Book>() {}.type
-                            )
-                        )
                     }
                 }
-            })
+            }
+        } catch (e: Exception) {
+            _errorMessage.postValue("Failed to update book: ${e.message}")
         }
     }
 
-    private suspend fun callDeleteBookApi(id: Int): Boolean {
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .delete()
-            .url("http://192.168.0.100:8080/books/${id}")
-            .build()
-
-        return suspendCoroutine { continuation ->
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    _errorMessage.postValue("Delete Failed: ${e.message}")
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    response.use {
-                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                        continuation.resume(true)
-                    }
-                }
-            })
-        }
-    }
-
-    private suspend fun callUpdateBookApi(id: Int, book: Book): Boolean {
-        val client = OkHttpClient()
-
-        val requestBody =
-            gson.toJson(book).toRequestBody("application/json".toMediaTypeOrNull())
-        val request = Request.Builder()
-            .addHeader("Content-Type", "application/json")
-            .url("${API_URL}/${id}")
-            .patch(requestBody)
-            .build()
-
-        return suspendCoroutine { continuation ->
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    _errorMessage.postValue("Update Failed: ${e.message}")
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    response.use {
-                        if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                        continuation.resume(true)
-                    }
-                }
-            })
-        }
-    }
 }

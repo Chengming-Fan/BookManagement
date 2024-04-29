@@ -66,6 +66,7 @@ class ListFragment : Fragment(), MenuProvider {
             bookListAdapter.setData(bookList)
         }
         bookViewModel.errorMessage.observe(viewLifecycleOwner) {
+            Log.d("FAN", "error message: $it")
             Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
         }
         bookViewModel.fetchBooks()
