@@ -2,7 +2,8 @@
 An Android app for showing books, creating books, updating books and deleting books.
 
 ## Prerequisite
-+ Android 12
++ Android 12  
+
 Tested on: 
   + Pixel 6(Android13, virtual)
   + Pixel 6(Android13, physical)
