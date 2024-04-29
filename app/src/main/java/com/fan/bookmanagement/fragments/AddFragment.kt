@@ -11,10 +11,9 @@ import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import by.dzmitry_lakisau.month_year_picker_dialog.MonthYearPickerDialog
-import com.fan.bookmanagement.R
 import com.fan.bookmanagement.data.Book
 import com.fan.bookmanagement.databinding.FragmentAddBinding
+import com.fan.bookmanagement.utils.YearPickerUtil
 import com.fan.bookmanagement.viewmodels.BookViewModel
 
 class AddFragment : Fragment() {
@@ -36,25 +35,17 @@ class AddFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
+        initView()
+    }
+
+    private fun initView() {
         this.context?.let {
-            val dialog = MonthYearPickerDialog.Builder(
-                it,
-                R.style.Style_MonthYearPickerDialog_Purple,
-                selectedYear = resources.getInteger(R.integer.currentYear)
-            )
-                .setMinYear(resources.getInteger(R.integer.minYear))
-                .setMode(MonthYearPickerDialog.Mode.YEAR_ONLY)
-                .setOnYearSelectedListener { year ->
-                    binding.edittextYear.setText(year.toString())
-                }
-                .build()
-            binding.edittextYear.setOnClickListener {
-                dialog.show()
-            }
+            YearPickerUtil.addYearPickDialogForEditText(it, binding.edittextYear)
         }
         binding.buttonAdd.isEnabled = false
         binding.edittextTitle.requestFocus()
-        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(binding.edittextTitle, InputMethodManager.SHOW_IMPLICIT)
 
         binding.edittextTitle.addTextChangedListener(textWatcher)
@@ -77,13 +68,6 @@ class AddFragment : Fragment() {
         }
     }
 
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private val textWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {}
         override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -96,4 +80,10 @@ class AddFragment : Fragment() {
                     year.isNotEmpty() && isbn.isNotEmpty()
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 }
