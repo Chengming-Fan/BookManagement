@@ -22,7 +22,6 @@ import com.fan.bookmanagement.adapters.BookListAdapter
 import com.fan.bookmanagement.data.Book
 import com.fan.bookmanagement.databinding.FragmentListBinding
 import com.fan.bookmanagement.viewmodels.BookViewModel
-import com.google.gson.Gson
 import com.yanzhenjie.recyclerview.SwipeMenuCreator
 import com.yanzhenjie.recyclerview.SwipeMenuItem
 import com.yanzhenjie.recyclerview.SwipeRecyclerView
@@ -58,8 +57,6 @@ class ListFragment : Fragment(), MenuProvider {
         }
         bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
         bookViewModel.bookList.observe(viewLifecycleOwner) { bookList ->
-            Log.d("FAN", bookList.size.toString())
-            Log.d("FAN", bookList.toString())
             bookListAdapter.setData(bookList)
         }
         bookViewModel.errorMessage.observe(viewLifecycleOwner) {
